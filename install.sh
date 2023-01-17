@@ -46,10 +46,6 @@ function setup_duplexer {
   echo "lp ALL=($zenity_user) NOPASSWD:/usr/bin/zenity" >> /etc/sudoers.d/lp
   chmod 440 /etc/sudoers.d/lp
 
-  cp -rf usr/lib/cups/filter/duplex_print_filter /usr/lib/cups/filter/duplex_print_filter
-  chown root:root /usr/lib/cups/filter/duplex_print_filter
-  chmod 755 /usr/lib/cups/filter/duplex_print_filter
-
   cp -rf usr/lib/cups/backend/duplex-print /usr/lib/cups/backend/duplex-print
   chown root:root /usr/lib/cups/backend/duplex-print
   chmod 700 /usr/lib/cups/backend/duplex-print
@@ -65,12 +61,7 @@ function setup_duplexer {
 #  sed -i 's/"0 hpcups"/"duplex_print_filter"/g' /etc/cups/ppd/Manual_Duplexer_$first_printer.ppd
   sed -i '/^*cupsFilter/d' /etc/cups/ppd/Manual_Duplexer_$first_printer.ppd
 
-  echo '*cupsFilter: "application/pdf 0 duplex_print_filter"' >> /etc/cups/ppd/Manual_Duplexer_$first_printer.ppd
-  echo '*cupsFilter: "text/html 0 duplex_print_filter"' >> /etc/cups/ppd/Manual_Duplexer_$first_printer.ppd
-  echo '*cupsFilter: "text/plain 0 duplex_print_filter"' >> /etc/cups/ppd/Manual_Duplexer_$first_printer.ppd
-  echo '*cupsFilter: "application/vnd.cups-raster 0 duplex_print_filter"' >> /etc/cups/ppd/Manual_Duplexer_$first_printer.ppd
-  echo '*cupsFilter: "application/vnd.cups-pdf 0 duplex_print_filter"' >> /etc/cups/ppd/Manual_Duplexer_$first_printer.ppd
-
+  echo '*cupsFilter2: "application/pdf application/pdf 100 -"' >> /etc/cups/ppd/Manual_Duplexer_$first_printer.ppd
 
   sleep 1
 

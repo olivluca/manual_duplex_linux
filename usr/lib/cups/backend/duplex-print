@@ -37,18 +37,19 @@ title="$3"
 numcopies="$4"
 options="$5"
 filename="/var/spool/cups/duplex/$job.duplex"
+if test -z "$6" ; then
+  LOG "no filename, copying stdin to $filename"
+  cat - >"$filename"
+else
+  LOG "copying $6 to $filename"
+  cp "$6" "$filename"
+fi
 
 
 lp_args=
 for opt in $options
 do
 	lp_args="$lp_args -o $opt"
-done
-
-#test if file exists
-while [ ! -f "$filename" ]
-do
-  sleep 1
 done
 
 page_count=$(pdfinfo "$filename" | grep Pages | awk '{print $2}')
