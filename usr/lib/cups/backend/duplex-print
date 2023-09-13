@@ -62,7 +62,7 @@ if [ $(( $page_count )) -eq 1 ]; then
 
 #if more than one pages, print odd pages first and show user interface
 elif [ $(( $page_count )) -gt 1 ]; then
-	LOG more than one page was sent. printing odd pages
+	LOG more than one page was sent. printing odd pages from $filename to $USE_PRINTER with title $title
 	lp -s -d $USE_PRINTER -n "$numcopies" $lp_args -o page-set=odd -o collate=true -o outputorder=normal \
 		-o orientation-requested=3 -t "$title"-odd "$filename"
 	#show user interface
@@ -72,10 +72,23 @@ elif [ $(( $page_count )) -gt 1 ]; then
 	    --window-icon "/usr/share/manual_duplex_linux/printer.png"\
         --ok-label="Seguir" --cancel-label="Cancelar" --display=:0.0 --no-wrap ; then
 
-	LOG printing even pages
-	lp -s -d $USE_PRINTER -n "$numcopies" $lp_args -o page-set=even -o collate=true -o outputorder=reverse \
-		-o orientation-requested=6 -t "$title"-even "$filename"
-
+	LOG printing even pages from $filename to $USE_PRINTER with title $title
+	if [[ $((page_count %2)) -eq 0 ]]; then
+	  # when the document has an even number of pages, lp with -o page-set=event
+	  #  -o orientation-requested=6 prints an extra blank page messing up
+	  # the ordering of the pages, so I extract even pages and rotate them with
+	  # pdftk
+	  LOG even number of pages, use pdftk workaround
+          pdftk "$filename" cat evensouth output "${filename}.even"
+          lp -s -d $USE_PRINTER -n "$numcopies" $lp_args  -o collate=true -o outputorder=reverse \
+                   -t "$title"-even "${filename}.even"
+          rm "${filename}.even"
+        else
+          # with an odd number of pages, lp does the right thing
+          LOG odd number of pages, print directly
+	  lp -s -d $USE_PRINTER -n "$numcopies" $lp_args -o page-set=even -o collate=true -o outputorder=reverse \
+	  -o orientation-requested=6 -t "$title"-even "$filename"
+        fi
 
 # UNCOMMENT IF CUPS-FILTERS VERSION IS BELOW 1.0.55
 # Also SET your main printer as default printer
